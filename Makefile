@@ -3,12 +3,15 @@
 all: clean build example
 
 build/ctest: src/runner/main.c
-	gcc -lelf src/runner/main.c -o build/ctest
+	gcc -g -lelf src/runner/main.c -L build/ -o build/ctest
 
-build: build/ctest
+build/libctest.so: src/ctest.c
+	gcc -g -fPIC -shared -o build/libctest.so src/ctest.c
 
-build/tests.so: src/tests/unit_tests.c
-	gcc -g -fPIC -shared -o build/tests.so src/tests/unit_tests.c
+build: build/ctest build/libctest.so
+
+build/tests.so: src/tests/unit_tests.c build/libctest.so
+	gcc -g -fPIC -L build/ -l ctest -shared -o build/tests.so src/tests/unit_tests.c
 
 example: build/tests.so
 
